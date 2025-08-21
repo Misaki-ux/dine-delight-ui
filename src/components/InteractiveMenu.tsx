@@ -125,20 +125,23 @@ export default function InteractiveMenu() {
   return (
     <section className="py-20 bg-gradient-to-b from-background to-card">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-elegant text-primary mb-4">Our Interactive Menu</h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Discover our carefully crafted dishes and add them to your order
+        <div className="text-center mb-16">
+          <h2 className="text-5xl font-elegant text-primary mb-6">Our Interactive Menu</h2>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            Discover our carefully crafted dishes made with the finest ingredients and add them to your order
           </p>
+          <div className="w-24 h-1 bg-gradient-to-r from-primary to-accent mx-auto mt-6 rounded-full"></div>
         </div>
 
         {/* Cart Summary */}
         {cart.length > 0 && (
-          <div className="mb-8">
-            <Card className="max-w-md mx-auto">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2">
-                  <ShoppingCart className="h-5 w-5" />
+          <div className="mb-12">
+            <Card className="max-w-lg mx-auto warm-shadow">
+              <CardHeader className="pb-4 bg-gradient-to-r from-primary/5 to-accent/5">
+                <CardTitle className="flex items-center gap-3 text-xl">
+                  <div className="p-2 bg-primary/10 rounded-full">
+                    <ShoppingCart className="h-5 w-5 text-primary" />
+                  </div>
                   Your Order ({cart.reduce((sum, item) => sum + item.quantity, 0)} items)
                 </CardTitle>
               </CardHeader>
@@ -175,9 +178,13 @@ export default function InteractiveMenu() {
 
         {/* Menu Categories */}
         <Tabs defaultValue={categories[0]?.id} className="w-full">
-          <TabsList className="grid w-full max-w-2xl mx-auto mb-8" style={{ gridTemplateColumns: `repeat(${categories.length}, 1fr)` }}>
+          <TabsList className="grid w-full max-w-3xl mx-auto mb-12 p-1 h-auto bg-card warm-shadow" style={{ gridTemplateColumns: `repeat(${categories.length}, 1fr)` }}>
             {categories.map((category) => (
-              <TabsTrigger key={category.id} value={category.id}>
+              <TabsTrigger 
+                key={category.id} 
+                value={category.id}
+                className="text-lg py-4 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg transition-smooth"
+              >
                 {category.name}
               </TabsTrigger>
             ))}
@@ -185,51 +192,84 @@ export default function InteractiveMenu() {
 
           {categories.map((category) => (
             <TabsContent key={category.id} value={category.id}>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="mb-6">
+                <h3 className="text-2xl font-elegant text-primary mb-2">{category.name}</h3>
+                <p className="text-muted-foreground mb-8">{category.description}</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {category.menu_items?.map((item) => (
-                  <Card key={item.id} className="transition-smooth hover:elegant-shadow">
-                    <CardHeader>
-                      {item.image_url && (
-                        <div className="aspect-video rounded-lg overflow-hidden mb-4">
-                          <img
-                            src={item.image_url}
-                            alt={item.name}
-                            className="w-full h-full object-cover"
-                          />
+                  <Card key={item.id} className="transition-smooth hover:elegant-shadow hover:scale-105 group overflow-hidden">
+                    {/* Image Section */}
+                    <div className="relative aspect-[4/3] overflow-hidden">
+                      {item.image_url ? (
+                        <img
+                          src={item.image_url}
+                          alt={item.name}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
+                          <div className="text-muted-foreground text-6xl opacity-20">🍽️</div>
                         </div>
                       )}
-                      <div className="flex items-start justify-between">
-                        <CardTitle className="font-elegant text-xl">{item.name}</CardTitle>
-                        {item.is_popular && (
-                          <Badge variant="secondary" className="ml-2">Popular</Badge>
-                        )}
-                      </div>
-                      <CardDescription className="text-sm">
+                      {item.is_popular && (
+                        <Badge className="absolute top-3 right-3 bg-accent text-accent-foreground shadow-lg">
+                          Popular
+                        </Badge>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    </div>
+
+                    <CardHeader className="pb-4">
+                      <CardTitle className="font-elegant text-xl text-primary">{item.name}</CardTitle>
+                      <CardDescription className="text-sm leading-relaxed line-clamp-3">
                         {item.description}
                       </CardDescription>
                     </CardHeader>
                     
-                    <CardContent>
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="text-2xl font-semibold text-primary">
+                    <CardContent className="pt-0">
+                      {/* Dietary tags and allergens */}
+                      {(item.dietary_tags?.length > 0 || item.allergens?.length > 0) && (
+                        <div className="space-y-3 mb-4">
+                          {item.dietary_tags?.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              {item.dietary_tags.map((tag) => (
+                                <Badge key={tag} variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                          {item.allergens?.length > 0 && (
+                            <div className="text-xs text-amber-600 bg-amber-50 p-2 rounded-md">
+                              <span className="font-medium">Contains:</span> {item.allergens.join(", ")}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between">
+                        <div className="text-2xl font-bold text-primary">
                           ${item.price.toFixed(2)}
-                        </span>
+                        </div>
                         
                         {getCartItemQuantity(item.id) > 0 ? (
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-3 bg-card rounded-full p-1 border">
                             <Button
                               size="sm"
-                              variant="outline"
+                              variant="ghost"
+                              className="h-8 w-8 rounded-full"
                               onClick={() => removeFromCart(item.id)}
                             >
                               <Minus className="h-4 w-4" />
                             </Button>
-                            <span className="w-8 text-center font-medium">
+                            <span className="w-8 text-center font-bold text-primary">
                               {getCartItemQuantity(item.id)}
                             </span>
                             <Button
                               size="sm"
-                              variant="outline"
+                              variant="ghost"
+                              className="h-8 w-8 rounded-full"
                               onClick={() => addToCart(item)}
                             >
                               <Plus className="h-4 w-4" />
@@ -237,8 +277,7 @@ export default function InteractiveMenu() {
                           </div>
                         ) : (
                           <Button
-                            size="sm"
-                            variant="accent"
+                            className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-lg"
                             onClick={() => addToCart(item)}
                           >
                             <Plus className="h-4 w-4 mr-2" />
@@ -246,26 +285,6 @@ export default function InteractiveMenu() {
                           </Button>
                         )}
                       </div>
-
-                      {/* Dietary tags and allergens */}
-                      {(item.dietary_tags?.length > 0 || item.allergens?.length > 0) && (
-                        <div className="space-y-2">
-                          {item.dietary_tags?.length > 0 && (
-                            <div className="flex flex-wrap gap-1">
-                              {item.dietary_tags.map((tag) => (
-                                <Badge key={tag} variant="outline" className="text-xs">
-                                  {tag}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                          {item.allergens?.length > 0 && (
-                            <div className="text-xs text-muted-foreground">
-                              <span className="font-medium">Contains:</span> {item.allergens.join(", ")}
-                            </div>
-                          )}
-                        </div>
-                      )}
                     </CardContent>
                   </Card>
                 ))}
